@@ -1,0 +1,49 @@
+------USING WINDOWS FUNCTIONS IN SQL
+
+------FINDING RUNNING TOTALS
+SELECT duration_seconds, start_time,
+SUM(duration_seconds) OVER (ORDER BY start_time) AS running_total
+FROM tutorial.dc_bikeshare_q1_2012
+
+-----USING PARTTION IN FINDING RUNNING TOTALS 
+SELECT start_terminal,duration_seconds, start_time,
+SUM(duration_seconds) OVER (PARTITION BY start_terminal ORDER BY start_time) AS running_total
+FROM tutorial.dc_bikeshare_q1_2012
+
+-----WITHOUT ORDER BY CLAUSE 
+SELECT start_terminal,duration_seconds, start_time,
+SUM(duration_seconds) OVER (PARTITION BY start_terminal) AS running_total
+FROM tutorial.dc_bikeshare_q1_2012
+
+-----USING THE NORMAL AGGREGATE FUNCTIONS 
+SELECT start_terminal,duration_seconds, start_time,
+SUM(duration_seconds) OVER (PARTITION BY start_terminal ORDER BY start_time) AS running_total,
+COUNT(duration_seconds) OVER (PARTITION BY start_terminal ORDER BY start_time) AS running_count,
+AVG(duration_seconds) OVER (PARTITION BY start_terminal ORDER BY start_time) AS running_avg
+FROM tutorial.dc_bikeshare_q1_2012
+
+-----USING ROWNUMBER() TO ASSIGN NUMBERS TO ROWS
+SELECT start_terminal,duration_seconds, start_time,
+ROW_NUMBER() OVER (PARTITION BY start_terminal ORDER BY start_time) AS row_number
+FROM tutorial.dc_bikeshare_q1_2012
+WHERE start_time < '2012-01-08'
+
+------USING RANK() TO ASSIGN NUMBERS TO ROWS 
+SELECT start_terminal,duration_seconds, start_time,
+RANK() OVER (PARTITION BY start_terminal ORDER BY start_time) AS row_number
+FROM tutorial.dc_bikeshare_q1_2012
+WHERE start_time < '2012-01-08'
+
+-------USING DENSERANK() TO ASSIGN NUMBERS TO ROWS
+SELECT start_terminal,duration_seconds, start_time,
+DENSE_RANK() OVER (PARTITION BY start_terminal ORDER BY start_time) AS row_number
+FROM tutorial.dc_bikeshare_q1_2012
+WHERE start_time < '2012-01-08'
+
+------USING NTILE() TO FIND PERCENTILES IN DATA
+SELECT start_terminal,duration_seconds, start_time,
+NTILE(4) OVER (PARTITION BY start_terminal ORDER BY duration_seconds) AS quartile,
+NTILE(5) OVER (PARTITION BY start_terminal ORDER BY duration_seconds) AS quintile,
+NTILE(100) OVER (PARTITION BY start_terminal ORDER BY duration_seconds) AS percentile
+FROM tutorial.dc_bikeshare_q1_2012
+WHERE start_time < '2012-01-08'
