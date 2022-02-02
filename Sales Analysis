@@ -22,6 +22,17 @@ COUNT(duration_seconds) OVER (PARTITION BY start_terminal ORDER BY start_time) A
 AVG(duration_seconds) OVER (PARTITION BY start_terminal ORDER BY start_time) AS running_avg
 FROM tutorial.dc_bikeshare_q1_2012
 
+-----FINDING SALES GROWTH PERCENTAGES
+SELECT growth.*, ((next_month_revenue - sales_revenue)/sales_revenue)*100 AS per_growth
+FROM
+(SELECT  EXTRACT('month'  FROM occurred_at) AS new_month,
+        sales_revenue,
+        LEAD (sales_revenue, 1) OVER (ORDER BY  EXTRACT('month'  FROM occurred_at) ASC) AS next_month_revenue,
+        sales_revenue - LAG (sales_revenue) OVER (ORDER BY EXTRACT('month'  FROM occurred_at) ASC) AS revenue_growth
+FROM tutorial.sales_performance AS a
+JOIN tutorial.orders AS b
+ON a.id = b.id) AS growth
+
 -----USING ROWNUMBER() TO ASSIGN NUMBERS TO ROWS
 SELECT start_terminal,duration_seconds, start_time,
 ROW_NUMBER() OVER (PARTITION BY start_terminal ORDER BY start_time) AS row_number
@@ -33,6 +44,9 @@ SELECT start_terminal,duration_seconds, start_time,
 RANK() OVER (PARTITION BY start_terminal ORDER BY start_time) AS row_number
 FROM tutorial.dc_bikeshare_q1_2012
 WHERE start_time < '2012-01-08'
+
+
+
 
 -------USING DENSERANK() TO ASSIGN NUMBERS TO ROWS
 SELECT start_terminal,duration_seconds, start_time,
